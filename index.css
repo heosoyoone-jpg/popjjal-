@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 슬라이더 썸을 좀 더 말랑하게 */
+input[type="range"] {
+  cursor: pointer;
+}
