@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>티스토리·네이버 블로그 이미지 용량 제한 총정리 · 압축짤</title>
+<meta name="description" content="티스토리, 네이버 블로그, 워드프레스 등 플랫폼별 이미지 업로드 용량 제한과 해결법을 정리했습니다.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',sans-serif;background:#FFF9EC;min-height:100vh;padding:1.5rem 1rem 4rem;color:#2D2400}
+.wrap{max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:1.25rem}
+.top-bar{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+.back-btn{display:inline-flex;align-items:center;gap:.3rem;background:#fff;border:2px solid #FFD166;border-radius:12px;padding:.4rem .85rem;font-size:.82rem;font-weight:700;color:#5A4400;text-decoration:none;transition:background .15s}
+.back-btn:hover{background:#FFFBEF}
+.logo-sm{display:inline-flex;align-items:center;gap:.4rem;background:#FFD166;color:#3A2F00;padding:.3rem 1rem;border-radius:999px;font-size:1rem;font-weight:900;box-shadow:0 3px 12px #FFD16640;text-decoration:none}
+.ad-slot{width:100%;overflow:hidden;height:0;min-height:0}
+.ad-slot.has-ad{height:auto}
+.page-card{background:#fff;border-radius:24px;border:2px solid #FFE599;padding:1.5rem 1.5rem 2rem;display:flex;flex-direction:column;gap:1.4rem}
+.article-header{display:flex;flex-direction:column;gap:.4rem}
+.article-cat{font-size:.72rem;font-weight:700;color:#FF8C42;letter-spacing:.06em}
+.article-title{font-size:1.2rem;font-weight:900;color:#3A2F00;line-height:1.4}
+.article-desc{font-size:.82rem;color:#888;line-height:1.6}
+.article-date{font-size:.72rem;color:#bbb;font-weight:600}
+.sec{display:flex;flex-direction:column;gap:.6rem}
+.sec-title{font-size:.95rem;font-weight:900;color:#3A2F00;padding-left:.65rem;border-left:3px solid #FFD166}
+.sec-body{font-size:.84rem;color:#555;line-height:1.85}
+.sec-body strong{color:#3A2F00;font-weight:700}
+.sec-body ul,.sec-body ol{padding-left:1.2rem;margin-top:.3rem}
+.sec-body ul li,.sec-body ol li{margin-bottom:.4rem}
+.highlight{background:#FFFBEF;border-radius:14px;border:1.5px solid #FFE599;padding:.85rem 1rem;font-size:.82rem;color:#5A4400;line-height:1.75}
+.highlight strong{color:#A07800}
+.tip{background:#F0FDF4;border-radius:14px;border:1.5px solid #86EFAC;padding:.85rem 1rem;font-size:.82rem;color:#2E7D52;line-height:1.75}
+.tip strong{font-weight:900}
+.cta-box{background:#FFD166;border-radius:18px;padding:1.1rem 1.25rem;text-align:center;display:flex;flex-direction:column;gap:.5rem}
+.cta-box p{font-size:.84rem;font-weight:700;color:#3A2F00}
+.cta-btn{display:inline-block;background:#3A2F00;color:#FFD166;border-radius:12px;padding:.6rem 1.4rem;font-size:.88rem;font-weight:900;text-decoration:none;transition:opacity .15s}
+.cta-btn:hover{opacity:.85}
+.guide-more{display:flex;flex-direction:column;gap:.5rem}
+.guide-card{background:#FFFBEF;border-radius:14px;border:1.5px solid #FFE599;padding:.75rem 1rem;display:flex;align-items:center;gap:.65rem;text-decoration:none;transition:background .15s}
+.guide-card:hover{background:#FFF3CC}
+.guide-num{width:24px;height:24px;border-radius:8px;background:#FFD166;color:#3A2F00;font-size:.7rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.guide-info{flex:1}
+.guide-ttl{font-size:.82rem;font-weight:700;color:#2D2400}
+.guide-arr{color:#C9A227;font-size:.8rem}
+footer{text-align:center;font-size:.72rem;color:#bbb;font-weight:600;display:flex;flex-direction:column;gap:.4rem}
+.footer-links{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap}
+.footer-links a{color:#C9A227;text-decoration:none;font-weight:700}
+.footer-links a:hover{text-decoration:underline}
+.footer-sep{color:#ddd}
+.platform-card{background:#FFFBEF;border-radius:16px;border:1.5px solid #FFE599;padding:1rem;display:flex;flex-direction:column;gap:.5rem}
+.platform-name{font-size:.9rem;font-weight:900;color:#3A2F00}
+.platform-info{font-size:.8rem;color:#555;line-height:1.7}
+.limit-badge{display:inline-block;background:#FFD166;color:#3A2F00;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:8px;margin-right:.3rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top-bar">
+    <a href="compjjal.html" class="back-btn">← 홈으로</a>
+    <a href="compjjal.html" class="logo-sm">🍿 압축짤</a>
+  </div>
+  <div class="ad-slot" id="adTop"></div>
+  <div class="page-card">
+    <div class="article-header">
+      <div class="article-cat">📖 이미지 최적화 가이드 03</div>
+      <div class="article-title">티스토리·네이버 블로그 이미지 용량 제한 총정리</div>
+      <div class="article-desc">이미지 업로드 오류를 겪어보셨나요? 국내 주요 블로그 플랫폼별 이미지 용량 제한과 권장 설정, 해결 방법을 정리했습니다.</div>
+      <div class="article-date">2025년 7월</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">플랫폼별 이미지 제한 총정리</div>
+      <div class="platform-card">
+        <div class="platform-name">🟠 티스토리</div>
+        <div class="platform-info">
+          <span class="limit-badge">파일당 최대 10MB</span><br>
+          WebP, JPG, PNG, GIF 모두 지원. 이미지 1장 최대 10MB까지 업로드 가능합니다. 단 고화질 사진을 그대로 올리면 페이지 속도에 영향을 줍니다. <strong>실사용 권장 용량은 200KB~500KB</strong> 이하입니다. 티스토리는 업로드 후 자체적으로 이미지를 리사이즈하지 않으므로 미리 압축해서 올리는 것이 중요합니다.
+        </div>
+      </div>
+      <div class="platform-card">
+        <div class="platform-name">🟢 네이버 블로그</div>
+        <div class="platform-info">
+          <span class="limit-badge">파일당 최대 10MB</span><br>
+          네이버 블로그도 WebP를 지원하며 파일당 10MB 제한이 있습니다. 단, 네이버 블로그는 업로드 시 자체적으로 이미지를 일정 크기로 리사이즈하는 경우가 있어 원본 화질이 변할 수 있습니다. <strong>업로드 전 최적 크기로 줄여두면 리사이즈 없이 원하는 화질 그대로</strong> 표시됩니다.
+        </div>
+      </div>
+      <div class="platform-card">
+        <div class="platform-name">🔵 워드프레스 (WordPress.com 무료)</div>
+        <div class="platform-info">
+          <span class="limit-badge">파일당 최대 1MB</span><span class="limit-badge">총 3GB</span><br>
+          WordPress.com 무료 플랜은 파일당 1MB로 제한이 엄격합니다. 스마트폰 사진을 그대로 올리면 대부분 실패합니다. 압축짤로 미리 500KB 이하로 줄여두세요. 자체 호스팅(WordPress.org)은 서버 설정에 따라 다르며 보통 2MB~8MB입니다.
+        </div>
+      </div>
+      <div class="platform-card">
+        <div class="platform-name">⚫ 브런치 (Brunch)</div>
+        <div class="platform-info">
+          <span class="limit-badge">파일당 최대 5MB</span><br>
+          브런치는 JPG와 PNG를 주로 지원하며 WebP 지원 여부는 업로드 시 확인이 필요합니다. 긴 글보다 에세이 형식이 많아 이미지 수가 적은 편이지만, 대표 이미지의 품질이 중요하므로 화질을 유지하면서 용량을 줄이는 게 핵심입니다.
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">용량 제한에 걸렸을 때 해결 방법</div>
+      <div class="sec-body">
+        이미지 업로드 오류가 발생하는 이유는 대부분 파일 용량 초과입니다. 아래 순서로 해결하세요.
+        <ol>
+          <li><strong>압축짤에서 WebP로 변환</strong> — 대부분의 경우 50% 이상 용량이 줄어들어 업로드 제한을 통과합니다.</li>
+          <li><strong>출력 포맷을 JPG로 변경</strong> — WebP를 지원하지 않는 플랫폼이라면 JPG를 선택하세요.</li>
+          <li><strong>이미지 크기 확인</strong> — 압축짤은 가로 1920px를 초과하면 자동으로 리사이즈합니다. 블로그 본문용 이미지는 1200px 이하로 충분합니다.</li>
+          <li><strong>GIF 이미지 주의</strong> — GIF 애니메이션은 파일 크기가 매우 커지기 쉽습니다. 짧은 루프 영상이라면 GIF 대신 mp4 동영상으로 대체하는 것을 검토하세요.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>✅ 플랫폼별 권장 이미지 크기</strong><br>
+      • 티스토리: 가로 860px, 200~400KB 이하<br>
+      • 네이버 블로그: 가로 966px, 200~400KB 이하<br>
+      • 워드프레스 무료: 가로 1200px, 500KB 이하<br>
+      • 공통 권장: WebP 포맷, 품질 80~85%
+    </div>
+
+    <div class="highlight">
+      <strong>💡 자주 실수하는 것</strong><br>
+      스마트폰으로 찍은 사진은 기본적으로 4000×3000px, 4~8MB입니다. 이를 그대로 올리면 플랫폼 제한에 걸리거나 페이지 로딩이 극도로 느려집니다. 포스팅 전 항상 압축 과정을 거치는 습관을 들이세요.
+    </div>
+
+    <div class="cta-box">
+      <p>지금 바로 이미지 용량을 줄여보세요 🍿</p>
+      <a href="compjjal.html" class="cta-btn">압축짤 바로 사용하기 →</a>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">관련 가이드</div>
+      <div class="guide-more">
+        <a href="guide-1.html" class="guide-card"><div class="guide-num">1</div><div class="guide-info"><div class="guide-ttl">블로그 이미지 최적화 완벽 가이드</div></div><div class="guide-arr">→</div></a>
+        <a href="guide-5.html" class="guide-card"><div class="guide-num">5</div><div class="guide-info"><div class="guide-ttl">블로그 로딩 속도와 방문자 이탈률의 관계</div></div><div class="guide-arr">→</div></a>
+      </div>
+    </div>
+  </div>
+  <div class="ad-slot" id="adBottom"></div>
+  <footer>
+    <div>© 2025 압축짤</div>
+    <div class="footer-links">
+      <a href="compjjal.html">홈</a><span class="footer-sep">·</span>
+      <a href="guides.html">블로그 가이드</a><span class="footer-sep">·</span>
+      <a href="privacy.html">개인정보처리방침</a><span class="footer-sep">·</span>
+      <a href="terms.html">이용약관</a><span class="footer-sep">·</span>
+      <a href="mailto:help.compjjal@gmail.com">문의하기</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>압축짤 🍿 - 블로거를 위한 무료 이미지 압축 최적화 도구</title>
+<meta name="description" content="이미지를 WebP·PNG·JPG로 압축하고 파일명을 SEO에 맞게 일괄 변경하세요. 100% 브라우저에서 처리되어 서버 업로드 없이 빠르고 안전합니다.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',sans-serif;background:#FFF9EC;min-height:100vh;padding:1.5rem 1rem 3rem}
+#app{max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:1rem}
+
+/* 광고 컨테이너: 기본 숨김. 광고 로딩 시 .has-ad 클래스로 표시 */
+.ad-slot{width:100%;overflow:hidden;height:0;min-height:0;transition:height .2s}
+.ad-slot.has-ad{height:auto}
+
+header{text-align:center;padding:.25rem 0}
+.logo{display:inline-flex;align-items:center;gap:.5rem;background:#FFD166;color:#3A2F00;padding:.45rem 1.4rem;border-radius:999px;font-size:1.5rem;font-weight:900;box-shadow:0 4px 18px #FFD16650}
+.tagline{margin-top:.5rem;font-size:.82rem;font-weight:600;color:#888}
+.drop-zone{border-radius:24px;border:3px dashed #FFD166;background:#fff;padding:2.8rem 1rem;display:flex;flex-direction:column;align-items:center;gap:.75rem;cursor:pointer;transition:background .18s,transform .18s,border-color .18s;user-select:none;text-align:center}
+.drop-zone:hover,.drop-zone.drag{background:#FFFBEF;transform:scale(1.015);border-color:#EFC000}
+.drop-icon{font-size:3.2rem}
+.drop-title{font-size:1.05rem;font-weight:900;color:#2D2400}
+.drop-sub{font-size:.8rem;color:#888}
+.kw-box{background:#fff;border-radius:20px;border:2.5px solid #FFD166;padding:1rem 1.25rem;display:flex;flex-direction:column;gap:.5rem}
+.kw-label{font-size:.85rem;font-weight:700;color:#3A2F00}
+.kw-input{border-radius:12px;border:2px solid #FFD166;background:#FFFBEF;padding:.65rem 1rem;font-size:.85rem;font-weight:600;color:#2D2400;width:100%;outline:none;font-family:inherit;transition:border-color .15s}
+.kw-input:focus{border-color:#EFC000}
+.kw-hint{font-size:.74rem;color:#aaa}
+.kw-hint code{background:#FFF3CC;padding:1px 5px;border-radius:5px}
+.btn-row{display:flex;gap:.75rem}
+.btn{flex:1;padding:1rem;border-radius:18px;font-size:1rem;font-weight:900;border:none;cursor:pointer;transition:background .15s,transform .12s;font-family:inherit}
+.btn:active{transform:scale(.97)}
+.btn-go{background:#FFD166;color:#3A2F00}
+.btn-go:hover:not(:disabled){background:#EFC000}
+.btn-go:disabled{background:#E8E8E8;color:#bbb;cursor:not-allowed}
+.btn-dl{background:#43C97E;color:#fff}
+.btn-dl:hover{background:#35b36c}
+.list-wrap{display:flex;flex-direction:column;gap:.5rem}
+.list-header{display:flex;justify-content:space-between;align-items:center;padding:0 2px}
+.list-count{font-size:.82rem;font-weight:700;color:#666}
+.btn-reset{font-size:.75rem;color:#bbb;background:none;border:none;cursor:pointer;font-family:inherit;font-weight:700}
+.btn-reset:hover{color:#ef4444}
+.file-list{display:flex;flex-direction:column;gap:.5rem;max-height:260px;overflow-y:auto;padding-right:2px}
+.file-card{display:flex;align-items:center;gap:.75rem;background:#fff;border-radius:16px;padding:.65rem 1rem;border:.5px solid #F0E8CC;animation:bounceIn .35s cubic-bezier(.22,.68,0,1.2) both}
+@keyframes bounceIn{0%{opacity:0;transform:scale(.7) translateY(10px)}60%{opacity:1;transform:scale(1.04) translateY(-3px)}100%{transform:scale(1) translateY(0)}}
+.thumb{width:44px;height:44px;border-radius:12px;object-fit:cover;background:#FFF3CC;flex-shrink:0}
+.thumb-ph{width:44px;height:44px;border-radius:12px;background:#FFF3CC;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem}
+.file-info{flex:1;min-width:0}
+.file-name{font-size:.82rem;font-weight:700;color:#2D2400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-meta{font-size:.72rem;color:#aaa}
+.saving{color:#1A7A47;font-weight:700}
+.badge{font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:20px;flex-shrink:0;white-space:nowrap}
+.wait{background:#FFF3CC;color:#A07800}
+.proc{background:#DBEAFE;color:#1D4ED8}
+.done{background:#DCFCE7;color:#166534}
+.err{background:#FEE2E2;color:#991B1B}
+.progress-wrap{display:flex;flex-direction:column;gap:.4rem}
+.prog-label{display:flex;justify-content:space-between;font-size:.8rem;font-weight:700;color:#666}
+.prog-bg{background:#E8E8E8;border-radius:20px;height:14px;overflow:hidden}
+.prog-bar{height:14px;border-radius:20px;background:#FFD166;transition:width .3s}
+.done-box{background:#F0FDF4;border-radius:18px;border:2px solid #86EFAC;padding:1rem 1.25rem;animation:bounceIn .4s ease both}
+.done-title{font-size:1rem;font-weight:900;color:#166534}
+.done-sub{font-size:.82rem;color:#2E7D52;margin-top:.25rem}
+.done-stat{font-size:.75rem;color:#4ADE80;margin-top:.2rem;font-weight:700}
+.fmt-row{display:flex;gap:.5rem;flex-wrap:wrap}
+.fmt-btn{display:flex;align-items:center;gap:.35rem;background:#FFFBEF;border:2px solid #FFD166;border-radius:12px;padding:.45rem .9rem;font-size:.82rem;font-weight:700;color:#5A4400;cursor:pointer;transition:background .15s,border-color .15s;user-select:none}
+.fmt-btn:has(input:checked){background:#FFD166;border-color:#EFC000;color:#3A2F00}
+.fmt-btn input{display:none}
+.fmt-tag{font-size:.65rem;background:#FF8C42;color:#fff;padding:1px 6px;border-radius:8px;font-weight:700}
+
+/* ── 기능 소개 섹션 ── */
+.section-title{font-size:1rem;font-weight:900;color:#3A2F00;text-align:center}
+.feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.feature-card{background:#fff;border-radius:18px;border:1.5px solid #FFE599;padding:1rem;display:flex;flex-direction:column;gap:.35rem}
+.feature-icon{font-size:1.6rem}
+.feature-title{font-size:.84rem;font-weight:900;color:#3A2F00}
+.feature-desc{font-size:.76rem;color:#777;line-height:1.6}
+
+/* ── FAQ 섹션 ── */
+.faq-list{display:flex;flex-direction:column;gap:.6rem}
+.faq-item{background:#fff;border-radius:16px;border:1.5px solid #FFE599;overflow:hidden}
+.faq-q{width:100%;background:none;border:none;padding:.85rem 1rem;text-align:left;font-family:inherit;font-size:.84rem;font-weight:700;color:#3A2F00;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.faq-q:hover{background:#FFFBEF}
+.faq-arrow{font-size:.75rem;color:#C9A227;transition:transform .2s;flex-shrink:0}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .28s ease,padding .2s}
+.faq-a.open{max-height:300px;padding:.1rem 1rem .85rem}
+.faq-a p{font-size:.8rem;color:#555;line-height:1.75}
+.faq-a a{color:#C9A227;font-weight:700;text-decoration:none}
+.faq-a a:hover{text-decoration:underline}
+
+/* ── 가이드 링크 섹션 ── */
+.guide-list{display:flex;flex-direction:column;gap:.5rem}
+.guide-card{background:#fff;border-radius:16px;border:1.5px solid #FFE599;padding:.85rem 1rem;display:flex;align-items:center;gap:.75rem;text-decoration:none;transition:background .15s,transform .12s}
+.guide-card:hover{background:#FFFBEF;transform:translateX(3px)}
+.guide-num{width:28px;height:28px;border-radius:10px;background:#FFD166;color:#3A2F00;font-size:.75rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.guide-info{flex:1}
+.guide-ttl{font-size:.84rem;font-weight:700;color:#2D2400}
+.guide-sub{font-size:.73rem;color:#aaa;margin-top:.1rem}
+.guide-arr{color:#C9A227;font-size:.85rem;flex-shrink:0}
+
+/* ── 푸터 ── */
+footer{text-align:center;font-size:.72rem;color:#bbb;padding:.75rem 0 0;font-weight:600;display:flex;flex-direction:column;gap:.4rem}
+.footer-copy{color:#bbb}
+.footer-links{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap}
+.footer-links a{color:#C9A227;text-decoration:none;font-weight:700}
+.footer-links a:hover{text-decoration:underline}
+.footer-sep{color:#ddd}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- 상단 광고 슬롯: 광고 삽입 시 .has-ad 추가, 내부에 애드센스 코드 삽입 -->
+  <div class="ad-slot" id="adTop">
+    <!-- Google AdSense 코드를 여기에 삽입 -->
+  </div>
+
+  <header>
+    <div class="logo">🍿 압축짤</div>
+    <p class="tagline">블로거를 위한 무료 이미지 최적화 · 100% 브라우저에서만 처리</p>
+  </header>
+
+  <div class="drop-zone" id="dropZone">
+    <div class="drop-icon">📸</div>
+    <div class="drop-title">이미지를 여기에 드래그하거나 클릭!</div>
+    <div class="drop-sub">JPG · PNG · WebP · GIF 지원 · 한 번에 여러 장 OK</div>
+  </div>
+  <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
+
+  <div class="list-wrap" id="fileListWrap" style="display:none">
+    <div class="list-header">
+      <span class="list-count" id="listCount"></span>
+      <button class="btn-reset" id="btnReset">전체 삭제</button>
+    </div>
+    <div class="file-list" id="fileList"></div>
+    <!-- 변환 대기 광고 슬롯: 광고 삽입 시 .has-ad 추가 -->
+    <div class="ad-slot" id="adMid">
+      <!-- Google AdSense 코드를 여기에 삽입 -->
+    </div>
+  </div>
+
+  <div class="progress-wrap" id="progressWrap" style="display:none">
+    <div class="prog-label"><span>🍿 압축 중...</span><span id="pct">0%</span></div>
+    <div class="prog-bg"><div class="prog-bar" id="progBar" style="width:0%"></div></div>
+  </div>
+
+  <div class="kw-box">
+    <div class="kw-label">🏷️ 파일명 키워드</div>
+    <input class="kw-input" id="kwInput" type="text" placeholder="예: 대구맛집 → 대구맛집-1.webp">
+    <div class="kw-hint">비워두면 <code>image-1.확장자</code> 형식으로 저장됩니다</div>
+    <div class="kw-label" style="margin-top:.35rem">🎨 출력 포맷</div>
+    <div class="fmt-row">
+      <label class="fmt-btn"><input type="radio" name="fmt" value="webp" checked> WebP <span class="fmt-tag">추천</span></label>
+      <label class="fmt-btn"><input type="radio" name="fmt" value="png"> PNG</label>
+      <label class="fmt-btn"><input type="radio" name="fmt" value="jpeg"> JPG</label>
+    </div>
+    <div class="kw-hint" id="fmtHint">WebP — 블로그 SEO 최적, 가장 작은 용량</div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-go" id="btnGo" disabled>🚀 최적화 시작!</button>
+    <button class="btn btn-dl" id="btnDl" style="display:none">📦 ZIP 다운로드</button>
+  </div>
+
+  <div class="done-box" id="doneBox" style="display:none">
+    <div class="done-title">🎉 압축 완료!</div>
+    <div class="done-sub" id="doneMsg"></div>
+    <div class="done-stat" id="doneStat"></div>
+  </div>
+
+  <!-- 하단 광고 슬롯: 광고 삽입 시 .has-ad 추가 -->
+  <div class="ad-slot" id="adBottom">
+    <!-- Google AdSense 코드를 여기에 삽입 -->
+  </div>
+
+  <!-- ── 기능 소개 ── -->
+  <div style="display:flex;flex-direction:column;gap:.6rem">
+    <div class="section-title">✨ 압축짤이 특별한 이유</div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <div class="feature-title">100% 브라우저 처리</div>
+        <div class="feature-desc">이미지가 서버로 전송되지 않아요. 내 파일은 내 브라우저 안에서만 처리됩니다.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">빠른 일괄 변환</div>
+        <div class="feature-desc">여러 장을 동시에 올려도 OK. 한 번에 최적화하고 ZIP으로 받아가세요.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏷️</div>
+        <div class="feature-title">SEO 파일명 자동 변경</div>
+        <div class="feature-desc">키워드 한 번 입력하면 대구맛집-1.webp, 대구맛집-2.webp … 자동 완성!</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <div class="feature-title">3가지 포맷 지원</div>
+        <div class="feature-desc">WebP·PNG·JPG 원하는 형식으로 변환. 투명 배경도 PNG로 완벽 지원.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FAQ ── -->
+  <div style="display:flex;flex-direction:column;gap:.6rem">
+    <div class="section-title">❓ 자주 묻는 질문</div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>이미지가 외부 서버에 저장되나요?</span>
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-a">
+          <p>아니요, 전혀 저장되지 않습니다. 압축짤은 브라우저의 Canvas API를 이용해 이미지를 처리합니다. 업로드한 파일은 외부 서버로 전송되지 않고 오직 사용자의 브라우저 메모리 안에서만 처리되며, 페이지를 닫으면 즉시 사라집니다.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>WebP로 변환하면 블로그 SEO에 유리한가요?</span>
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-a">
+          <p>네, 구글은 페이지 로딩 속도를 SEO 점수에 반영합니다. 동일한 품질의 JPG 대비 WebP는 평균 30~50% 더 작아서 페이지가 빠르게 로드됩니다. 특히 Core Web Vitals의 LCP(최대 콘텐츠 표시 시간) 개선에 직접적인 영향을 줍니다. 자세한 내용은 <a href="guide-2.html">WebP vs PNG vs JPG 비교 가이드</a>를 참고하세요.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>파일명 키워드는 어떻게 정하나요?</span>
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-a">
+          <p>글의 핵심 키워드를 한국어로 입력하세요. 예를 들어 대구 맛집 포스팅이라면 '대구맛집'을 입력하면 대구맛집-1.webp, 대구맛집-2.webp … 순서로 저장됩니다. 구글은 이미지 파일명을 크롤링하기 때문에 정확한 키워드로 작성된 파일명이 이미지 검색 노출에 도움이 됩니다. <a href="guide-4.html">파일명 짓는 법 가이드</a>도 참고해 보세요.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>티스토리·네이버 블로그에서도 쓸 수 있나요?</span>
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-a">
+          <p>네! 티스토리는 WebP를 완전히 지원하고, 네이버 블로그도 WebP 업로드가 가능합니다. 단 플랫폼마다 이미지 용량 제한이 있는데, 압축짤로 미리 줄여두면 업로드 실패 없이 사용할 수 있어요. 자세한 플랫폼별 팁은 <a href="guide-3.html">플랫폼별 이미지 용량 제한 가이드</a>를 확인하세요.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>한 번에 몇 장까지 변환할 수 있나요?</span>
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-a">
+          <p>파일 개수 제한은 없습니다. 다만 한 번에 너무 많은 고해상도 이미지를 올리면 브라우저 메모리 부담이 생길 수 있어요. 일반적으로 20~30장 이하를 권장하며, 대량 작업 시에는 나눠서 처리하는 것이 안전합니다.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>PNG로 변환하면 투명 배경이 유지되나요?</span>
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-a">
+          <p>네, PNG 포맷을 선택하면 원본 이미지의 투명(알파) 채널이 그대로 유지됩니다. 로고, 아이콘, 스티커처럼 배경이 없는 이미지는 반드시 PNG로 변환하세요. WebP도 투명도를 지원하지만, 호환성이 걱정된다면 PNG가 가장 안전합니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 블로그 가이드 목록 ── -->
+  <div style="display:flex;flex-direction:column;gap:.6rem">
+    <div class="section-title">📖 블로거를 위한 이미지 최적화 가이드</div>
+    <div class="guide-list">
+      <a href="guide-1.html" class="guide-card">
+        <div class="guide-num">1</div>
+        <div class="guide-info">
+          <div class="guide-ttl">블로그 이미지 최적화 완벽 가이드</div>
+          <div class="guide-sub">SEO 점수를 올리는 이미지 세팅 A to Z</div>
+        </div>
+        <div class="guide-arr">→</div>
+      </a>
+      <a href="guide-2.html" class="guide-card">
+        <div class="guide-num">2</div>
+        <div class="guide-info">
+          <div class="guide-ttl">WebP vs PNG vs JPG — 무엇을 선택할까?</div>
+          <div class="guide-sub">블로그 용도별 포맷 완벽 비교</div>
+        </div>
+        <div class="guide-arr">→</div>
+      </a>
+      <a href="guide-3.html" class="guide-card">
+        <div class="guide-num">3</div>
+        <div class="guide-info">
+          <div class="guide-ttl">티스토리·네이버 블로그 이미지 용량 제한 총정리</div>
+          <div class="guide-sub">플랫폼별 업로드 한도와 해결법</div>
+        </div>
+        <div class="guide-arr">→</div>
+      </a>
+      <a href="guide-4.html" class="guide-card">
+        <div class="guide-num">4</div>
+        <div class="guide-info">
+          <div class="guide-ttl">구글이 좋아하는 이미지 파일명 짓는 법</div>
+          <div class="guide-sub">이미지 검색 노출을 높이는 SEO 파일명 전략</div>
+        </div>
+        <div class="guide-arr">→</div>
+      </a>
+      <a href="guide-5.html" class="guide-card">
+        <div class="guide-num">5</div>
+        <div class="guide-info">
+          <div class="guide-ttl">블로그 로딩 속도와 방문자 이탈률의 관계</div>
+          <div class="guide-sub">느린 블로그가 검색 순위를 망치는 이유</div>
+        </div>
+        <div class="guide-arr">→</div>
+      </a>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-copy">모든 이미지 처리는 브라우저 안에서만 이루어집니다 🔒 · © 2025 압축짤</div>
+    <div class="footer-links">
+      <a href="guides.html">블로그 가이드</a>
+      <span class="footer-sep">·</span>
+      <a href="privacy.html">개인정보처리방침</a>
+      <span class="footer-sep">·</span>
+      <a href="terms.html">이용약관</a>
+      <span class="footer-sep">·</span>
+      <a href="mailto:help.compjjal@gmail.com">문의하기</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+const QUALITY=0.82,MAX_DIM=1920,MAX_CONCURRENT=4;
+const FMT_INFO={webp:{mime:'image/webp',ext:'webp',hint:'WebP — 블로그 SEO 최적, 가장 작은 용량'},png:{mime:'image/png',ext:'png',hint:'PNG — 투명 배경 유지, 무손실 압축'},jpeg:{mime:'image/jpeg',ext:'jpg',hint:'JPG — 사진에 최적, 넓은 호환성'}};
+let items=[],blobs=[],processing=false;
+function getFmt(){return document.querySelector('input[name="fmt"]:checked')?.value||'webp';}
+
+const $=id=>document.getElementById(id);
+const dropZone=$('dropZone'),fileInput=$('fileInput'),fileList=$('fileList'),
+      fileListWrap=$('fileListWrap'),listCount=$('listCount'),btnGo=$('btnGo'),
+      btnDl=$('btnDl'),btnReset=$('btnReset'),progressWrap=$('progressWrap'),
+      progBar=$('progBar'),pct=$('pct'),doneBox=$('doneBox'),
+      doneMsg=$('doneMsg'),doneStat=$('doneStat'),kwInput=$('kwInput'),adMid=$('adMid');
+
+document.querySelectorAll('input[name="fmt"]').forEach(r=>r.addEventListener('change',()=>{
+  const f=FMT_INFO[getFmt()];
+  document.getElementById('fmtHint').textContent=f.hint;
+  kwInput.placeholder=`예: 대구맛집 → 대구맛집-1.${f.ext}`;
+  document.querySelector('.kw-hint').innerHTML=`비워두면 <code>image-1.${f.ext}</code> 형식으로 저장됩니다`;
+}));
+dropZone.onclick=()=>fileInput.click();
+dropZone.ondragover=e=>{e.preventDefault();dropZone.classList.add('drag')};
+dropZone.ondragleave=()=>dropZone.classList.remove('drag');
+dropZone.ondrop=e=>{e.preventDefault();dropZone.classList.remove('drag');addFiles(e.dataTransfer.files)};
+fileInput.onchange=e=>{addFiles(e.target.files);e.target.value=''};
+btnReset.onclick=reset;
+
+function addFiles(files){
+  const imgs=[...files].filter(f=>f.type.startsWith('image/'));
+  if(!imgs.length)return;
+  imgs.forEach(f=>items.push({id:crypto.randomUUID(),file:f,origSize:f.size,compSize:null,status:'wait',previewUrl:URL.createObjectURL(f)}));
+  renderList();btnGo.disabled=false;
+  doneBox.style.display='none';btnDl.style.display='none';
+}
+function renderList(){
+  fileListWrap.style.display='flex';
+  listCount.textContent=`📂 ${items.length}개 이미지`;
+  fileList.innerHTML='';
+  items.forEach((it,i)=>{
+    const d=document.createElement('div');
+    d.className='file-card';d.id='card-'+it.id;d.style.animationDelay=(i*35)+'ms';
+    d.innerHTML=cardHTML(it);fileList.appendChild(d);
+  });
+}
+function cardHTML(it){
+  const thumb=it.previewUrl?`<img class="thumb" src="${it.previewUrl}" alt="">`:`<div class="thumb-ph">🖼️</div>`;
+  const kb=(it.origSize/1024).toFixed(0);
+  const ckb=it.compSize?(it.compSize/1024).toFixed(0):null;
+  const sv=ckb?Math.round((1-it.compSize/it.origSize)*100):null;
+  const meta=ckb?`${kb} KB <span class="saving">→ ${ckb} KB (-${sv}%)</span>`:`${kb} KB`;
+  const bc={wait:'wait',proc:'proc',done:'done',err:'err'}[it.status];
+  const bt={wait:'대기',proc:'처리중',done:'✓ 완료',err:'오류'}[it.status];
+  return `${thumb}<div class="file-info"><div class="file-name">${it.file.name}</div><div class="file-meta">${meta}</div></div><span class="badge ${bc}">${bt}</span>`;
+}
+function updateCard(id){
+  const it=items.find(x=>x.id===id),card=document.getElementById('card-'+id);
+  if(!card||!it)return;card.innerHTML=cardHTML(it);
+}
+function compressOne(item,mime){
+  return new Promise((res,rej)=>{
+    const img=new Image();
+    img.onload=()=>{
+      let w=img.naturalWidth,h=img.naturalHeight;
+      if(w>MAX_DIM||h>MAX_DIM){const r=Math.min(MAX_DIM/w,MAX_DIM/h);w=Math.round(w*r);h=Math.round(h*r);}
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      const q=mime==='image/png'?undefined:QUALITY;
+      c.toBlob(b=>b?res(b):rej(new Error('toBlob failed')),mime,q);
+    };
+    img.onerror=()=>rej(new Error('load failed'));
+    img.src=item.previewUrl;
+  });
+}
+async function runBatches(tasks,n,onProg){
+  for(let i=0;i<tasks.length;i+=n){
+    await Promise.allSettled(tasks.slice(i,i+n).map(t=>t()));
+    onProg(Math.min(i+n,tasks.length),tasks.length);
+    await new Promise(r=>setTimeout(r,0));
+  }
+}
+btnGo.onclick=async()=>{
+  if(!items.length||processing)return;
+  processing=true;blobs=[];btnGo.disabled=true;
+  doneBox.style.display='none';btnDl.style.display='none';
+  adMid.classList.remove('has-ad');
+  items.forEach(it=>{it.status='wait';it.compSize=null;});
+  renderList();progressWrap.style.display='flex';
+  const kw=kwInput.value.trim()||'image';
+  const fmt=FMT_INFO[getFmt()];
+  const tasks=items.map((it,idx)=>async()=>{
+    it.status='proc';updateCard(it.id);
+    const fn=`${kw}-${idx+1}.${fmt.ext}`;
+    try{
+      const blob=await compressOne(it,fmt.mime);
+      blobs.push({blob,filename:fn});
+      it.compSize=blob.size;it.status='done';
+    }catch{it.status='err';}
+    updateCard(it.id);
+  });
+  await runBatches(tasks,MAX_CONCURRENT,(done,total)=>{
+    const p=Math.round(done/total*100);
+    progBar.style.width=p+'%';pct.textContent=p+'%';
+  });
+  progressWrap.style.display='none';processing=false;btnGo.disabled=false;
+  btnDl.style.display='block';
+  const origTotal=items.reduce((s,it)=>s+it.origSize,0);
+  const compTotal=items.reduce((s,it)=>s+(it.compSize??it.origSize),0);
+  const saved=Math.round((1-compTotal/origTotal)*100);
+  doneMsg.textContent=`${items.length}개 이미지가 ${fmt.ext.toUpperCase()}로 변환되었습니다. ZIP 다운로드 버튼을 누르세요.`;
+  doneStat.textContent=`평균 용량 절감: ${saved}% · ${(origTotal/1024/1024).toFixed(1)} MB → ${(compTotal/1024/1024).toFixed(1)} MB`;
+  doneBox.style.display='block';
+};
+btnDl.onclick=async()=>{
+  if(!blobs.length)return;
+  const zip=new JSZip();
+  blobs.forEach(({blob,filename})=>zip.file(filename,blob));
+  const zb=await zip.generateAsync({type:'blob'});
+  const url=URL.createObjectURL(zb);
+  const a=document.createElement('a');
+  a.href=url;a.download=`압축짤-${kwInput.value.trim()||'images'}.zip`;
+  a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
+};
+function reset(){
+  items.forEach(it=>it.previewUrl&&URL.revokeObjectURL(it.previewUrl));
+  items=[];blobs=[];
+  fileList.innerHTML='';fileListWrap.style.display='none';
+  doneBox.style.display='none';btnDl.style.display='none';btnGo.disabled=true;
+  progressWrap.style.display='none';progBar.style.width='0%';pct.textContent='0%';
+}
+function toggleFaq(btn){
+  const ans=btn.nextElementSibling;
+  const arrow=btn.querySelector('.faq-arrow');
+  const isOpen=ans.classList.contains('open');
+  document.querySelectorAll('.faq-a.open').forEach(a=>{
+    a.classList.remove('open');
+    a.previousElementSibling.querySelector('.faq-arrow').style.transform='';
+  });
+  if(!isOpen){ans.classList.add('open');arrow.style.transform='rotate(180deg)';}
+}
+</script>
+</body>
+</html>
